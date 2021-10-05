@@ -20,7 +20,7 @@ TARGET_CFLAGS+= -D_GNU_SOURCE
 define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=@TARGET_bcm53xx_DEVICE_phicomm-k3 +@KERNEL_DEVMEM +!@BUSYBOX_CONFIG_ARPING:iputils-arping +bash
+  DEPENDS:=+@KERNEL_DEVMEM +!@BUSYBOX_CONFIG_ARPING:iputils-arping +bash
   TITLE:=LCD screen controller on PHICOMM K3
   URL:=https://github.com/Hill-98/k3screenctrl
 endef
