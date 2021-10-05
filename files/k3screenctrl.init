@@ -1,0 +1,58 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=99
+
+USE_PROCD=1
+
+NAME=k3screenctrl
+
+TEMP_DIR=/var/k3screenctrl
+
+device_custom() {
+    config_get mac $1 mac
+    config_get name $1 name
+    config_get icon $1 icon
+    [ -z "$name" ] && name="?"
+    [ $icon -eq 0 ] && icon=""
+    echo "$mac $name $icon" >> $DEVICE_CUSTOM_FILE
+}
+
+init_config() {
+    DEVICE_CUSTOM_FILE=$TEMP_DIR/device_custom
+
+    [ -z "$(grep "/lib/k3screenctrl/oui/update_oui.sh" /etc/crontabs/root)" ] && echo "0 6 * * * /lib/k3screenctrl/oui/update_oui.sh" >> /etc/crontabs/root
+    
+    mkdir -p $TEMP_DIR/device_speed
+    touch $DEVICE_CUSTOM_FILE
+    nvram get et0macaddr > $TEMP_DIR/macaddr
+
+    config_load $NAME
+    config_get m general screen_time
+    config_get d general refresh_time
+    config_foreach device_custom device_custom
+    wc -l $DEVICE_CUSTOM_FILE | awk '{print $1}' >> $DEVICE_CUSTOM_FILE
+
+    [ -z "$(iptables --list | grep K3_SEREEN_U)" ] && iptables -N K3_SEREEN_U
+    [ -z "$(iptables --list | grep K3_SEREEN_D)" ] && iptables -N K3_SEREEN_D
+}
+
+start_service() {
+    init_config
+
+	procd_open_instance
+	procd_set_param command /usr/bin/k3screenctrl -m $m -d $d
+	procd_set_param respawn
+    procd_set_param stdout 1
+    procd_set_param pidfile /var/run/k3screenctrl.pid
+	procd_close_instance
+
+    procd_open_instance
+	procd_set_param command /lib/k3screenctrl/device_online.sh
+	procd_set_param respawn 0 60 5
+	procd_close_instance
+}
+
+stop_service() {
+    rm -rf $TEMP_DIR
+}
