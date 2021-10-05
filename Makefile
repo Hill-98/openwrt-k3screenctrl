@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=phicommk3-screenctrl
+PKG_NAME:=k3screenctrl
 PKG_VERSION:=1.0
-PKG_RELEASE:=2
+PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/Hill-98/k3screenctrl
